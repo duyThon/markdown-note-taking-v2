@@ -3,6 +3,11 @@ import "./auth.css";
 
 const Auth = () => {
   const [rightPanelActive, setRightPanelActive] = useState(false);
+  const [account, setAccount] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
 
   const handleSignUpClick = () => {
     setRightPanelActive(true);
@@ -12,6 +17,13 @@ const Auth = () => {
     setRightPanelActive(false);
   };
 
+  const handleChange = (e) => {
+  setAccount(prev => ({
+    ...prev,
+    [e.target.name]: e.target.value,
+  }));
+};
+
   return (
     <div
       className={`container ${rightPanelActive ? "right-panel-active" : ""}`}
@@ -20,17 +32,17 @@ const Auth = () => {
       <div className="form-container sign-up-container">
         <form action="#">
           <h1>Create Account</h1>
-          <input type="text" placeholder="Name" />
-          <input type="email" placeholder="Email" />
-          <input type="password" placeholder="Password" />
+          <input type="text" placeholder="User Name" value={account.username} name="username" onChange={handleChange}/>
+          <input type="email" placeholder="Email" value={account.email} name="email" onChange={handleChange}/>
+          <input type="password" placeholder="Password" value={account.password} name="password" onChange={handleChange}/>
           <button>Sign Up</button>
         </form>
       </div>
       <div className="form-container sign-in-container">
         <form action="#">
           <h1>Sign in</h1>
-          <input type="email" placeholder="Email" />
-          <input type="password" placeholder="Password" />
+          <input type="text" placeholder="User Name" value={account.username} name="username" onChange={handleChange}/>
+          <input type="password" placeholder="Password" value={account.password} name="password" onChange={handleChange}/>
           <a href="#">Forgot your password?</a>
           <button>Sign In</button>
         </form>
