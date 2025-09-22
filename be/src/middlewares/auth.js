@@ -12,7 +12,7 @@ export const authenticate = (req, res, next) => {
     const token = authHeader.split(" ")[1];
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({ message: "Invalid or expired token" });
-        req.user = { userId: user.userId, role: user.role };
+        req.user = { email: user.email, userId: user.userId, role: user.role };
         next();
     });
 }

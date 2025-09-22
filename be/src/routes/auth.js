@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import User from "../modules/Users.js";
+import { forgotPassword, resetPassword } from "../controllers/authController.js";
 
 dotenv.config();
 
@@ -12,15 +13,15 @@ const REFRESH_SECRET = process.env.REFRESH_SECRET;
 const JWT_EXPIRES_IN = "15m";
 
 router.post("/register", async (req, res) => {
-  const { username, password } = req.body;
-  (!username || !password) &&
+  const { username, password, email } = req.body;
+  (!username || !password || !email) &&
     res.status(400).json({ message: "Missing username or password" });
-  const existingUser = await User.findOne({ username });
+  const existingUser = await User.findOne({ email });
   if (existingUser)
     return res.status(400).json({ message: "User already exists" });
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await User.create({ username, password: hashedPassword });
+  const user = await User.create({ email, username, password: hashedPassword });
   res.status(201).json({ user });
 });
 
@@ -72,6 +73,7 @@ router.post("/refresh", async (req, res) => {
         expiresIn: JWT_EXPIRES_IN,
       }
     );
+    res.status(200).json({ accessToken });
   } catch (error) {
     console.log(error);
     res.status(403).json({ message: "Invalid or expired token" });
@@ -96,5 +98,9 @@ router.post("/logout", async (req, res) => {
     res.status(403).json({ message: "Invalid or expired token" });
   }
 })
+
+router.post("/forgot-password", forgotPassword);
+
+router.post("/reset-password/:token", resetPassword);
 
 export default router;

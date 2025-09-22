@@ -1,3 +1,7 @@
 be/node_modules
 be/.env
 be/package-lock.json
+
+fe/node_modules
+fe/.env
+fe/package-lock.json

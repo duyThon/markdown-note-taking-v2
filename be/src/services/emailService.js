@@ -1,18 +1,21 @@
+import dotenv from "dotenv";
+dotenv.config();
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS, // app password
+    pass: process.env.GMAIL_PASS,
   },
 });
 
 /**
- * Sinh HTML + text cho email reset password
- * @param {string} name - tên người nhận (có thể undefined)
- * @param {string} resetUrl - link reset đầy đủ
- * @param {number} expiresMinutes - số phút link có hiệu lực (optional)
+ * @param {string} name
+ * @param {string} resetUrl
+ * @param {number} expiresMinutes
  */
 export function buildResetEmail({ name, resetUrl, expiresMinutes = 15 }) {
   const safeName = name ? escapeHtml(name) : "Bạn";
@@ -101,24 +104,35 @@ Team Markdown Notes`;
   return { html, text: plainText };
 }
 
-// sendMail wrapper
 export async function sendMail({ to, subject, html, text }) {
-  return transporter.sendMail({
-    from: `"Markdown Notes" <${process.env.GMAIL_USER}>`,
+  try {
+    transporter.sendMail({
+      from: `"Markdown Notes" <${process.env.GMAIL_USER}>`,
+      to,
+      subject,
+      text,
+      html,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function sendResetEmail({
+  to,
+  name,
+  resetUrl,
+  expiresMinutes = 15,
+}) {
+  const { html, text } = buildResetEmail({ name, resetUrl, expiresMinutes });
+  return sendMail({
     to,
-    subject,
-    text,
+    subject: "Đặt lại mật khẩu — Markdown Notes",
     html,
+    text,
   });
 }
 
-// convenience: send reset email
-export async function sendResetEmail({ to, name, resetUrl, expiresMinutes = 15 }) {
-  const { html, text } = buildResetEmail({ name, resetUrl, expiresMinutes });
-  return sendMail({ to, subject: "Đặt lại mật khẩu — Markdown Notes", html, text });
-}
-
-/* === small helper to escape HTML inserted values (very simple) === */
 function escapeHtml(str = "") {
   return String(str)
     .replace(/&/g, "&amp;")
